@@ -27,6 +27,18 @@ SYSTEM_PROMPT_PATH = APP_DIR / "prompts" / "system_prompt.md"
 DEFAULT_MODEL = "gpt-4.1-mini"
 MAX_CONTEXT_CHARS = 12000
 
+
+def get_config_value(name: str, default: str = "") -> str:
+    """Read config from local .env first, then Streamlit Cloud secrets."""
+    env_value = os.getenv(name, "").strip()
+    if env_value:
+        return env_value
+    try:
+        secret_value = st.secrets.get(name, default)
+    except Exception:
+        secret_value = default
+    return str(secret_value).strip() if secret_value else default
+
 load_dotenv(APP_DIR / ".env")
 init_db()
 
@@ -44,8 +56,8 @@ def load_system_prompt() -> str:
 
 def get_openai_client() -> OpenAI | None:
     """Create an OpenAI-compatible client when an API key is configured."""
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    base_url = os.getenv("OPENAI_BASE_URL", "").strip()
+    api_key = get_config_value("OPENAI_API_KEY")
+    base_url = get_config_value("OPENAI_BASE_URL")
 
     if not api_key:
         return None
@@ -348,5 +360,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
