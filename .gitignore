@@ -1,0 +1,6 @@
+﻿.env
+reading_agent.db
+__pycache__/
+*.py[cod]
+.venv/
+.streamlit/secrets.toml
