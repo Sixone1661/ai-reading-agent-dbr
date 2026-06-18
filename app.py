@@ -734,6 +734,13 @@ def render_student_page() -> None:
             st.success("阅读笔记已保存。")
 
 
+
+    with tab_compare:
+        render_comparison_tab(session)
+
+    with tab_reflection:
+        render_reflection_feedback_tab(session)
+
 def render_teacher_page() -> None:
     """Teacher workflow: inspect notes/logs and export CSV files."""
     st.header("教师端：阅读过程与批判性笔记管理")
