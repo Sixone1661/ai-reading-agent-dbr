@@ -48,6 +48,155 @@ st.set_page_config(
     layout="wide",
 )
 
+PRIMARY_COLOR = "#2563EB"
+PAGE_BACKGROUND = "#F8FAFC"
+CARD_BACKGROUND = "#FFFFFF"
+BORDER_COLOR = "#E5E7EB"
+TEXT_COLOR = "#1F2937"
+MUTED_TEXT_COLOR = "#6B7280"
+
+
+def inject_global_css() -> None:
+    """Apply lightweight product styling without changing Streamlit behavior."""
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: {PAGE_BACKGROUND};
+            color: {TEXT_COLOR};
+        }}
+        h1, h2, h3 {{
+            color: {TEXT_COLOR};
+            letter-spacing: 0;
+        }}
+        [data-testid="stSidebar"] {{
+            background: #EEF3F8;
+            border-right: 1px solid {BORDER_COLOR};
+        }}
+        [data-testid="stMetric"] {{
+            background: {CARD_BACKGROUND};
+            border: 1px solid {BORDER_COLOR};
+            border-radius: 8px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        }}
+        div[data-testid="stButton"] > button,
+        div[data-testid="stDownloadButton"] > button {{
+            border-radius: 8px;
+            border: 1px solid {PRIMARY_COLOR};
+            background: {PRIMARY_COLOR};
+            color: white;
+            font-weight: 600;
+        }}
+        div[data-testid="stButton"] > button:hover,
+        div[data-testid="stDownloadButton"] > button:hover {{
+            border-color: #1D4ED8;
+            background: #1D4ED8;
+            color: white;
+        }}
+        .role-hero {{
+            max-width: 980px;
+            margin: 2.2rem auto 1.2rem auto;
+            text-align: center;
+        }}
+        .role-title {{
+            font-size: 2.2rem;
+            line-height: 1.2;
+            font-weight: 760;
+            color: {TEXT_COLOR};
+            margin-bottom: 0.5rem;
+        }}
+        .role-subtitle {{
+            font-size: 1.08rem;
+            color: {MUTED_TEXT_COLOR};
+            margin: 0 auto;
+            max-width: 760px;
+        }}
+        .role-card-copy {{
+            min-height: 126px;
+        }}
+        .role-card-title {{
+            font-size: 1.35rem;
+            font-weight: 720;
+            color: {TEXT_COLOR};
+            margin-bottom: 0.55rem;
+        }}
+        .role-card-desc {{
+            color: {MUTED_TEXT_COLOR};
+            line-height: 1.7;
+            font-size: 0.98rem;
+        }}
+        .section-label {{
+            color: {PRIMARY_COLOR};
+            font-weight: 700;
+            font-size: 0.92rem;
+            margin-bottom: 0.25rem;
+        }}
+        .muted-copy {{
+            color: {MUTED_TEXT_COLOR};
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def switch_role(role: str | None) -> None:
+    """Update the selected role and rerun the app."""
+    st.session_state["role"] = role
+    st.rerun()
+
+
+def render_role_selection() -> None:
+    """Render the product-style role selection landing page."""
+    st.markdown(
+        """
+        <div class="role-hero">
+            <div class="role-title">AI 文献阅读支架</div>
+            <div class="role-subtitle">
+                面向研究生批判性文献阅读能力提升的苏格拉底式对话工具
+            </div>
+            <p class="role-subtitle" style="margin-top: 1rem; font-size: 0.98rem;">
+                请选择你的使用身份，系统将根据不同角色提供对应的阅读支持与管理功能。
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    _, student_col, teacher_col, _ = st.columns([0.8, 1.5, 1.5, 0.8], gap="large")
+    with student_col:
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div class="role-card-copy">
+                    <div class="role-card-title">我是学生</div>
+                    <div class="role-card-desc">
+                        上传课程文献，接受 AI 苏格拉底式提问，完成批判性阅读笔记。
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("进入学生端", use_container_width=True, key="enter_student"):
+                switch_role("student")
+
+    with teacher_col:
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div class="role-card-copy">
+                    <div class="role-card-title">我是教师</div>
+                    <div class="role-card-desc">
+                        查看学生阅读过程、对话记录与批判性笔记，支持 DBR 研究过程管理。
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("进入教师端", use_container_width=True, key="enter_teacher"):
+                switch_role("teacher")
+
 
 def load_system_prompt() -> str:
     """Load the Socratic tutor instruction used for every chat."""
@@ -115,18 +264,22 @@ def ensure_session_state() -> None:
     """Initialize Streamlit session state keys."""
     st.session_state.setdefault("active_session_id", None)
     st.session_state.setdefault("active_session", None)
+    st.session_state.setdefault("role", None)
     st.session_state.setdefault("literature_input_mode", "手动复制粘贴")
     st.session_state.setdefault("uploaded_literature_text", "")
     st.session_state.setdefault("uploaded_literature_name", "")
 
 
-def student_page() -> None:
+def render_student_page() -> None:
     """Student workflow: create reading session, chat, and submit reading notes."""
     st.header("学生端：AI 苏格拉底式文献阅读支架")
     st.caption("V1.0 原型：用于研究生课程文献阅读节点，保存对话与批判性阅读笔记。")
 
     with st.sidebar:
-        st.subheader("创建阅读会话")
+        if st.button("返回角色选择", use_container_width=True):
+            switch_role(None)
+        st.divider()
+        st.subheader("阅读会话设置")
         input_mode = st.radio(
             "文献内容输入方式",
             ["手动复制粘贴", "上传 PDF / Word"],
@@ -292,19 +445,28 @@ def student_page() -> None:
             st.success("阅读笔记已保存。")
 
 
-def teacher_page() -> None:
+def render_teacher_page() -> None:
     """Teacher workflow: inspect notes/logs and export CSV files."""
-    st.header("教师端：研究数据查看与导出")
+    st.header("教师端：阅读过程与批判性笔记管理")
+
+    with st.sidebar:
+        if st.button("返回角色选择", use_container_width=True):
+            switch_role(None)
+        st.divider()
+        st.markdown("**教师管理区**")
+        st.caption("查看阅读过程、笔记与导出数据。")
 
     sessions = rows_to_dicts(get_sessions())
     messages_df = get_messages_dataframe()
     notes_df = get_reading_notes_dataframe()
 
+    st.markdown("<div class=\"section-label\">学生阅读会话概览</div>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     col1.metric("阅读会话数", len(sessions))
     col2.metric("对话消息数", len(messages_df))
     col3.metric("阅读笔记数", len(notes_df))
 
+    st.markdown("<div class=\"section-label\" style=\"margin-top: 1.2rem;\">数据导出或查看区域</div>", unsafe_allow_html=True)
     export_col1, export_col2 = st.columns(2)
     with export_col1:
         st.download_button(
@@ -323,7 +485,14 @@ def teacher_page() -> None:
             disabled=notes_df.empty,
         )
 
-    tab_notes, tab_logs = st.tabs(["阅读笔记", "对话日志"])
+    tab_overview, tab_notes, tab_logs = st.tabs(["文献阅读记录", "学生批判性笔记", "对话日志"])
+    with tab_overview:
+        if sessions:
+            st.dataframe(sessions, use_container_width=True, hide_index=True)
+        else:
+            st.info("暂无阅读会话记录。")
+
+    tab_notes, tab_logs = tab_notes, tab_logs
     with tab_notes:
         st.dataframe(notes_df, use_container_width=True, hide_index=True)
 
@@ -348,18 +517,19 @@ def teacher_page() -> None:
 
 def main() -> None:
     ensure_session_state()
-    st.title("AI Reading Agent DBR")
-    st.caption("面向研究生批判性文献阅读能力提升的 AI 苏格拉底式对话支架")
+    inject_global_css()
 
-    page = st.sidebar.radio("页面", ["学生端", "教师端"])
-    if page == "学生端":
-        student_page()
+    role = st.session_state.get("role")
+    if role is None:
+        render_role_selection()
+    elif role == "student":
+        render_student_page()
+    elif role == "teacher":
+        render_teacher_page()
     else:
-        teacher_page()
-
+        st.session_state["role"] = None
+        render_role_selection()
 
 if __name__ == "__main__":
     main()
-
-
 
