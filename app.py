@@ -12,12 +12,20 @@ from openai import OpenAI, OpenAIError
 from database import (
     add_message,
     create_session,
+    get_comparison_note,
     get_messages,
     get_reading_note,
     get_sessions,
+    get_student_feedback,
+    get_student_reflection,
+    get_teacher_feedback,
     init_db,
     rows_to_dicts,
+    upsert_comparison_note,
     upsert_reading_note,
+    upsert_student_feedback,
+    upsert_student_reflection,
+    upsert_teacher_feedback,
 )
 from export_utils import (
     dataframe_to_csv_bytes,
