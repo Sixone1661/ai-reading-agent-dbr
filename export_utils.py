@@ -99,4 +99,3 @@ def get_teacher_feedback_dataframe() -> pd.DataFrame:
     """
     with get_connection() as conn:
         return pd.read_sql_query(query, conn)
-

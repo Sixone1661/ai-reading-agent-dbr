@@ -440,4 +440,3 @@ def get_teacher_feedback(session_id: int) -> sqlite3.Row | None:
     """Return teacher feedback, if present."""
     with get_connection() as conn:
         return conn.execute("SELECT * FROM teacher_feedback WHERE session_id = ?", (session_id,)).fetchone()
-
