@@ -537,18 +537,18 @@ def render_student_page() -> None:
         messages = rows_to_dicts(get_messages(session["id"]))
         for message in messages:
             chat_role = "assistant" if message["role"] == "assistant" else "user"
-            with st.chat_message(chat_role, avatar="AI" if chat_role == "assistant" else "学"):
+            with st.chat_message(chat_role):
                 st.write(message["content"])
 
         user_input = st.chat_input("写下你的分析、困惑或对 AI 问题的回答……")
         if user_input:
             add_message(session["id"], "student", user_input)
-            with st.chat_message("user", avatar="学"):
+            with st.chat_message("user"):
                 st.write(user_input)
 
             latest_history = rows_to_dicts(get_messages(session["id"]))
             try:
-                with st.chat_message("assistant", avatar="AI"):
+                with st.chat_message("assistant"):
                     with st.spinner("AI 正在生成追问……"):
                         ai_reply = call_ai(session, latest_history)
                     st.write(ai_reply)
