@@ -19,7 +19,15 @@ from database import (
     rows_to_dicts,
     upsert_reading_note,
 )
-from export_utils import dataframe_to_csv_bytes, get_messages_dataframe, get_reading_notes_dataframe
+from export_utils import (
+    dataframe_to_csv_bytes,
+    get_comparison_notes_dataframe,
+    get_messages_dataframe,
+    get_reading_notes_dataframe,
+    get_student_feedback_dataframe,
+    get_student_reflections_dataframe,
+    get_teacher_feedback_dataframe,
+)
 from extract_utils import UnsupportedFileTypeError, extract_text_from_upload
 
 APP_DIR = Path(__file__).parent
@@ -409,6 +417,146 @@ def ensure_session_state() -> None:
     st.session_state.setdefault("uploaded_literature_name", "")
 
 
+
+def render_comparison_tab(session: dict) -> None:
+    """Render and save the T2 double-literature comparison table."""
+    existing = get_comparison_note(session["id"])
+    defaults = dict(existing) if existing else {}
+    with st.form("comparison_note_form"):
+        st.markdown("<div class=\"section-label\">T2 双文献比较表</div>", unsafe_allow_html=True)
+        comparison_literature_title = st.text_input(
+            "第二篇对比文献题目",
+            value=defaults.get("comparison_literature_title", ""),
+            placeholder="请输入用于比较的另一篇文献题目",
+        )
+        research_question_comparison = st.text_area(
+            "1. 研究问题比较：两篇文献分别解决什么问题？问题意识有何差异？",
+            value=defaults.get("research_question_comparison", ""),
+            height=100,
+        )
+        theory_comparison = st.text_area(
+            "2. 理论/概念框架比较：两篇文献使用的理论是否不同？适切性如何？",
+            value=defaults.get("theory_comparison", ""),
+            height=100,
+        )
+        method_comparison = st.text_area(
+            "3. 方法比较：研究对象、数据来源、分析方法有什么差异？哪种更适合回答问题？",
+            value=defaults.get("method_comparison", ""),
+            height=100,
+        )
+        evidence_comparison = st.text_area(
+            "4. 证据链比较：两篇文献的证据是否充分？结论是否存在过度推断？",
+            value=defaults.get("evidence_comparison", ""),
+            height=100,
+        )
+        contribution_limit_comparison = st.text_area(
+            "5. 贡献与局限比较：两篇文献各自贡献、局限和改进方向是什么？",
+            value=defaults.get("contribution_limit_comparison", ""),
+            height=100,
+        )
+        synthesis_reflection = st.text_area(
+            "6. 综合反思：比较后，你对该主题或自己的研究问题有什么新理解？",
+            value=defaults.get("synthesis_reflection", ""),
+            height=100,
+        )
+        submitted = st.form_submit_button("保存双文献比较表")
+
+    if submitted:
+        upsert_comparison_note(
+            session["id"],
+            session["student_id"],
+            session["week_node"],
+            session["literature_title"],
+            comparison_literature_title,
+            research_question_comparison,
+            theory_comparison,
+            method_comparison,
+            evidence_comparison,
+            contribution_limit_comparison,
+            synthesis_reflection,
+        )
+        st.success("双文献比较表已保存。")
+
+
+def render_reflection_feedback_tab(session: dict) -> None:
+    """Render and save student reflection text plus short feedback questionnaire."""
+    existing_reflection = get_student_reflection(session["id"])
+    reflection_defaults = dict(existing_reflection) if existing_reflection else {}
+    existing_feedback = get_student_feedback(session["id"])
+    feedback_defaults = dict(existing_feedback) if existing_feedback else {}
+
+    with st.form("student_reflection_form"):
+        st.markdown("<div class=\"section-label\">学生反思文本</div>", unsafe_allow_html=True)
+        reflection_stage = st.selectbox(
+            "反思阶段",
+            ["T1 单篇深读后", "T2 双文献比较后", "T3 文献汇报后", "后测/总结反思"],
+            index=["T1 单篇深读后", "T2 双文献比较后", "T3 文献汇报后", "后测/总结反思"].index(reflection_defaults.get("reflection_stage", "T1 单篇深读后"))
+            if reflection_defaults.get("reflection_stage") in ["T1 单篇深读后", "T2 双文献比较后", "T3 文献汇报后", "后测/总结反思"]
+            else 0,
+        )
+        evidence_use_reflection = st.text_area(
+            "1. 我是否回到原文寻找证据？哪些回答是基于原文线索作出的？",
+            value=reflection_defaults.get("evidence_use_reflection", ""),
+            height=100,
+        )
+        revised_understanding = st.text_area(
+            "2. 在 AI 追问后，我修正了哪些原有理解？",
+            value=reflection_defaults.get("revised_understanding", ""),
+            height=100,
+        )
+        ai_dependency_reflection = st.text_area(
+            "3. 我是否依赖 AI 摘要或判断？我如何核查 AI 的提示？",
+            value=reflection_defaults.get("ai_dependency_reflection", ""),
+            height=100,
+        )
+        remaining_questions = st.text_area(
+            "4. 我仍然想追问的问题，或下一步需要重新阅读的部分",
+            value=reflection_defaults.get("remaining_questions", ""),
+            height=90,
+        )
+        reflection_submitted = st.form_submit_button("保存反思文本")
+
+    if reflection_submitted:
+        upsert_student_reflection(
+            session["id"],
+            session["student_id"],
+            session["week_node"],
+            session["literature_title"],
+            reflection_stage,
+            evidence_use_reflection,
+            revised_understanding,
+            ai_dependency_reflection,
+            remaining_questions,
+        )
+        st.success("学生反思文本已保存。")
+
+    with st.form("student_feedback_form"):
+        st.markdown("<div class=\"section-label\">即时/阶段反馈问卷</div>", unsafe_allow_html=True)
+        st.caption("1 = 非常不同意 / 很低，5 = 非常同意 / 很高")
+        usefulness = st.slider("AI 支架对我理解文献有帮助", 1, 5, int(feedback_defaults.get("usefulness", 3) or 3))
+        ease_of_use = st.slider("这个工具容易使用", 1, 5, int(feedback_defaults.get("ease_of_use", 3) or 3))
+        critical_reading_support = st.slider("AI 追问促进了我的批判性阅读", 1, 5, int(feedback_defaults.get("critical_reading_support", 3) or 3))
+        ai_dependency_awareness = st.slider("这个过程降低了我对 AI 摘要的直接依赖", 1, 5, int(feedback_defaults.get("ai_dependency_awareness", 3) or 3))
+        satisfaction = st.slider("整体使用满意度", 1, 5, int(feedback_defaults.get("satisfaction", 3) or 3))
+        helpful_questions = st.text_area("哪些 AI 追问最有帮助？", value=feedback_defaults.get("helpful_questions", ""), height=90)
+        improvement_suggestions = st.text_area("你希望下一轮如何改进问题链或模板？", value=feedback_defaults.get("improvement_suggestions", ""), height=90)
+        feedback_submitted = st.form_submit_button("保存反馈问卷")
+
+    if feedback_submitted:
+        upsert_student_feedback(
+            session["id"],
+            session["student_id"],
+            session["week_node"],
+            session["literature_title"],
+            usefulness,
+            ease_of_use,
+            critical_reading_support,
+            ai_dependency_awareness,
+            satisfaction,
+            helpful_questions,
+            improvement_suggestions,
+        )
+        st.success("学生反馈问卷已保存。")
 def render_student_page() -> None:
     """Student workflow: create reading session, chat, and submit reading notes."""
     st.header("学生端：AI 苏格拉底式文献阅读支架")
@@ -531,7 +679,7 @@ def render_student_page() -> None:
     if not api_key_ready:
         st.warning("尚未配置 OPENAI_API_KEY。你仍可填写和保存笔记，但 AI 聊天需要先配置 .env。")
 
-    tab_chat, tab_note = st.tabs(["AI 对话", "批判性阅读笔记"])
+    tab_chat, tab_note, tab_compare, tab_reflection = st.tabs(["AI 对话", "批判性阅读笔记", "双文献比较", "反思与反馈"])
 
     with tab_chat:
         messages = rows_to_dicts(get_messages(session["id"]))
@@ -628,7 +776,7 @@ def render_teacher_page() -> None:
             type="secondary",
         )
 
-    tab_overview, tab_notes, tab_logs = st.tabs(["文献阅读记录", "学生批判性笔记", "对话日志"])
+    tab_overview, tab_notes, tab_research, tab_teacher_feedback, tab_logs = st.tabs(["文献阅读记录", "学生批判性笔记", "DBR研究数据", "教师反馈评分", "对话日志"])
     with tab_overview:
         if sessions:
             st.dataframe(sessions, use_container_width=True, hide_index=True)
