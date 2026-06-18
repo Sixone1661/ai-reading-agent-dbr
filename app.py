@@ -48,99 +48,238 @@ st.set_page_config(
     layout="wide",
 )
 
-PRIMARY_COLOR = "#2563EB"
-PAGE_BACKGROUND = "#F8FAFC"
-CARD_BACKGROUND = "#FFFFFF"
-BORDER_COLOR = "#E5E7EB"
-TEXT_COLOR = "#1F2937"
-MUTED_TEXT_COLOR = "#6B7280"
+BG_COLOR = "#FBF7F1"
+SURFACE_COLOR = "#FFFFFF"
+TEXT_COLOR = "#221D16"
+TEXT_MUTED_COLOR = "#6E665A"
+TEXT_FAINT_COLOR = "#A89C88"
+BORDER_COLOR = "#ECE5D9"
+BORDER_STRONG_COLOR = "#DDC4A8"
+ACCENT_COLOR = "#BC6A30"
+ACCENT_DARK_COLOR = "#A2571F"
+ACCENT_TINT_COLOR = "#F6EDE3"
+ACCENT_TINT_BORDER_COLOR = "#E8D6C1"
 
 
 def inject_global_css() -> None:
-    """Apply lightweight product styling without changing Streamlit behavior."""
+    """Apply the warm sand amber visual system without changing app behavior."""
     st.markdown(
         f"""
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
         <style>
+        html, body, [class*="css"] {{
+            font-family: 'Noto Sans SC', sans-serif;
+        }}
         .stApp {{
-            background: {PAGE_BACKGROUND};
+            background: {BG_COLOR};
             color: {TEXT_COLOR};
         }}
-        h1, h2, h3 {{
-            color: {TEXT_COLOR};
-            letter-spacing: 0;
+        .block-container {{
+            max-width: 1080px;
+            padding-top: 2.2rem;
         }}
-        [data-testid="stSidebar"] {{
-            background: #EEF3F8;
+        h1 {{
+            font-family: 'Noto Serif SC', serif !important;
+            font-weight: 700 !important;
+            color: {TEXT_COLOR} !important;
+            font-size: 2rem !important;
+            letter-spacing: .01em;
+        }}
+        h2 {{
+            font-family: 'Noto Serif SC', serif !important;
+            font-weight: 700 !important;
+            color: {TEXT_COLOR} !important;
+            font-size: 1.35rem !important;
+        }}
+        h3 {{
+            font-family: 'Noto Serif SC', serif !important;
+            font-weight: 600 !important;
+            color: {TEXT_COLOR} !important;
+            font-size: 1.05rem !important;
+        }}
+        p, label, .stMarkdown {{
+            color: {TEXT_COLOR};
+        }}
+        .stCaption, [data-testid="stCaptionContainer"] {{
+            color: {TEXT_MUTED_COLOR} !important;
+        }}
+        .stButton > button,
+        .stDownloadButton > button {{
+            background: {ACCENT_COLOR};
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: .55rem 1rem;
+            transition: background .15s ease, border-color .15s ease;
+        }}
+        .stButton > button:hover,
+        .stDownloadButton > button:hover {{
+            background: {ACCENT_DARK_COLOR};
+            color: #fff;
+        }}
+        .stButton > button:focus,
+        .stDownloadButton > button:focus {{
+            box-shadow: 0 0 0 3px {ACCENT_TINT_COLOR};
+        }}
+        .stButton > button[kind="secondary"],
+        .stDownloadButton > button[kind="secondary"] {{
+            background: #fff;
+            color: {ACCENT_COLOR};
+            border: 1px solid {BORDER_STRONG_COLOR};
+        }}
+        .stButton > button[kind="secondary"]:hover,
+        .stDownloadButton > button[kind="secondary"]:hover {{
+            background: {ACCENT_TINT_COLOR};
+            color: {ACCENT_DARK_COLOR};
+            border-color: {BORDER_STRONG_COLOR};
+        }}
+        section[data-testid="stSidebar"] {{
+            background: #fff;
             border-right: 1px solid {BORDER_COLOR};
         }}
+        section[data-testid="stSidebar"] .block-container {{
+            padding-top: 1.4rem;
+        }}
+        .sb-group {{
+            font-size: 11px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: {TEXT_FAINT_COLOR};
+            font-weight: 700;
+            margin: 1.1rem 0 .5rem;
+            padding-bottom: .4rem;
+            border-bottom: 1px solid {BORDER_COLOR};
+        }}
+        .stTextInput input,
+        .stTextArea textarea,
+        .stSelectbox div[data-baseweb="select"] > div,
+        .stNumberInput input {{
+            background: {BG_COLOR} !important;
+            border: 1px solid {BORDER_COLOR} !important;
+            border-radius: 6px !important;
+            color: {TEXT_COLOR} !important;
+        }}
+        .stTextInput input:focus,
+        .stTextArea textarea:focus {{
+            border-color: {ACCENT_COLOR} !important;
+            box-shadow: 0 0 0 3px {ACCENT_TINT_COLOR} !important;
+        }}
+        .stRadio [aria-checked="true"] svg {{
+            color: {ACCENT_COLOR} !important;
+            fill: {ACCENT_COLOR} !important;
+        }}
         [data-testid="stMetric"] {{
-            background: {CARD_BACKGROUND};
+            background: #fff;
             border: 1px solid {BORDER_COLOR};
             border-radius: 8px;
-            padding: 14px 16px;
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+            padding: 1rem 1.1rem;
+            box-shadow: 0 1px 3px rgba(34,29,22,.05);
         }}
-        div[data-testid="stButton"] > button,
-        div[data-testid="stDownloadButton"] > button {{
+        [data-testid="stMetricValue"] {{
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            color: {TEXT_COLOR};
+        }}
+        [data-testid="stMetricLabel"] {{
+            color: {TEXT_MUTED_COLOR};
+        }}
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: .25rem;
+            border-bottom: 1px solid {BORDER_COLOR};
+        }}
+        .stTabs [data-baseweb="tab"] {{
+            color: {TEXT_MUTED_COLOR};
+            font-weight: 500;
+            padding: .5rem .9rem;
+        }}
+        .stTabs [aria-selected="true"] {{
+            color: {ACCENT_COLOR} !important;
+            border-bottom: 2px solid {ACCENT_COLOR} !important;
+        }}
+        [data-testid="stDataFrame"], .stDataFrame {{
+            border: 1px solid {BORDER_COLOR};
             border-radius: 8px;
-            border: 1px solid {PRIMARY_COLOR};
-            background: {PRIMARY_COLOR};
-            color: white;
-            font-weight: 600;
+            overflow: hidden;
         }}
-        div[data-testid="stButton"] > button:hover,
-        div[data-testid="stDownloadButton"] > button:hover {{
-            border-color: #1D4ED8;
-            background: #1D4ED8;
-            color: white;
+        [data-testid="stAlert"] {{
+            background: {ACCENT_TINT_COLOR};
+            border: 1px solid {ACCENT_TINT_BORDER_COLOR};
+            border-radius: 8px;
+            color: #7A4A23;
+        }}
+        [data-testid="stFileUploader"] section {{
+            background: {BG_COLOR};
+            border: 1px dashed {BORDER_STRONG_COLOR};
+            border-radius: 8px;
+        }}
+        [data-testid="stVerticalBlockBorderWrapper"] {{
+            background: #fff;
+            border: 1px solid {BORDER_COLOR} !important;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(34,29,22,.05);
         }}
         .role-hero {{
-            max-width: 980px;
-            margin: 2.2rem auto 1.2rem auto;
+            max-width: 880px;
+            margin: 1.8rem auto 1.3rem auto;
             text-align: center;
         }}
         .role-title {{
-            font-size: 2.2rem;
-            line-height: 1.2;
-            font-weight: 760;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2rem;
+            line-height: 1.25;
+            font-weight: 700;
             color: {TEXT_COLOR};
-            margin-bottom: 0.5rem;
+            margin-bottom: .45rem;
         }}
         .role-subtitle {{
-            font-size: 1.08rem;
-            color: {MUTED_TEXT_COLOR};
+            font-size: 1rem;
+            color: {TEXT_MUTED_COLOR};
             margin: 0 auto;
             max-width: 760px;
+            line-height: 1.75;
         }}
         .role-card-copy {{
-            min-height: 126px;
+            min-height: 132px;
         }}
         .role-card-title {{
-            font-size: 1.35rem;
-            font-weight: 720;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.22rem;
+            font-weight: 700;
             color: {TEXT_COLOR};
-            margin-bottom: 0.55rem;
+            margin-bottom: .55rem;
         }}
         .role-card-desc {{
-            color: {MUTED_TEXT_COLOR};
-            line-height: 1.7;
-            font-size: 0.98rem;
+            color: {TEXT_MUTED_COLOR};
+            line-height: 1.75;
+            font-size: .96rem;
         }}
         .section-label {{
-            color: {PRIMARY_COLOR};
+            color: {ACCENT_COLOR};
             font-weight: 700;
-            font-size: 0.92rem;
-            margin-bottom: 0.25rem;
+            font-size: .86rem;
+            letter-spacing: .08em;
+            margin: 1rem 0 .35rem;
         }}
         .muted-copy {{
-            color: {MUTED_TEXT_COLOR};
+            color: {TEXT_MUTED_COLOR};
+        }}
+        [data-testid="stChatMessage"] {{
+            background: #fff;
+            border: 1px solid {BORDER_COLOR};
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(34,29,22,.04);
+            padding: .75rem .9rem;
+        }}
+        [data-testid="stChatMessageAvatar"] {{
+            background: {ACCENT_COLOR};
+            color: white;
+            font-weight: 700;
         }}
         </style>
         """,
         unsafe_allow_html=True,
     )
-
-
 def switch_role(role: str | None) -> None:
     """Update the selected role and rerun the app."""
     st.session_state["role"] = role
@@ -178,7 +317,7 @@ def render_role_selection() -> None:
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button("进入学生端", use_container_width=True, key="enter_student"):
+            if st.button("进入学生端", use_container_width=True, key="enter_student", type="primary"):
                 switch_role("student")
 
     with teacher_col:
@@ -194,7 +333,7 @@ def render_role_selection() -> None:
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button("进入教师端", use_container_width=True, key="enter_teacher"):
+            if st.button("进入教师端", use_container_width=True, key="enter_teacher", type="secondary"):
                 switch_role("teacher")
 
 
@@ -276,10 +415,10 @@ def render_student_page() -> None:
     st.caption("V1.0 原型：用于研究生课程文献阅读节点，保存对话与批判性阅读笔记。")
 
     with st.sidebar:
-        if st.button("返回角色选择", use_container_width=True):
+        if st.button("返回角色选择", use_container_width=True, type="secondary"):
             switch_role(None)
         st.divider()
-        st.subheader("阅读会话设置")
+        st.markdown('<div class="sb-group">阅读会话设置</div>', unsafe_allow_html=True)
         input_mode = st.radio(
             "文献内容输入方式",
             ["手动复制粘贴", "上传 PDF / Word"],
@@ -327,6 +466,7 @@ def render_student_page() -> None:
                     st.error(f"文件解析失败：{exc}")
 
         with st.form("session_form"):
+            st.markdown('<div class="sb-group">文档信息</div>', unsafe_allow_html=True)
             student_id = st.text_input("学生编号", placeholder="如 S001")
             week_node = st.selectbox("周次节点", ["T0", "T1", "T2", "T3"])
             literature_title = st.text_input("文献题目")
@@ -336,6 +476,7 @@ def render_student_page() -> None:
                 literature_excerpt = st.session_state.uploaded_literature_text
                 if st.session_state.uploaded_literature_name:
                     st.caption(f"当前上传文件：{st.session_state.uploaded_literature_name}")
+            st.markdown('<div class="sb-group">任务类型</div>', unsafe_allow_html=True)
             task_type = st.selectbox(
                 "任务类型",
                 [
@@ -396,18 +537,18 @@ def render_student_page() -> None:
         messages = rows_to_dicts(get_messages(session["id"]))
         for message in messages:
             chat_role = "assistant" if message["role"] == "assistant" else "user"
-            with st.chat_message(chat_role):
+            with st.chat_message(chat_role, avatar="AI" if chat_role == "assistant" else "学"):
                 st.write(message["content"])
 
         user_input = st.chat_input("写下你的分析、困惑或对 AI 问题的回答……")
         if user_input:
             add_message(session["id"], "student", user_input)
-            with st.chat_message("user"):
+            with st.chat_message("user", avatar="学"):
                 st.write(user_input)
 
             latest_history = rows_to_dicts(get_messages(session["id"]))
             try:
-                with st.chat_message("assistant"):
+                with st.chat_message("assistant", avatar="AI"):
                     with st.spinner("AI 正在生成追问……"):
                         ai_reply = call_ai(session, latest_history)
                     st.write(ai_reply)
@@ -450,10 +591,10 @@ def render_teacher_page() -> None:
     st.header("教师端：阅读过程与批判性笔记管理")
 
     with st.sidebar:
-        if st.button("返回角色选择", use_container_width=True):
+        if st.button("返回角色选择", use_container_width=True, type="secondary"):
             switch_role(None)
         st.divider()
-        st.markdown("**教师管理区**")
+        st.markdown('<div class="sb-group">教师管理区</div>', unsafe_allow_html=True)
         st.caption("查看阅读过程、笔记与导出数据。")
 
     sessions = rows_to_dicts(get_sessions())
@@ -475,6 +616,7 @@ def render_teacher_page() -> None:
             file_name="dialogue_logs.csv",
             mime="text/csv",
             disabled=messages_df.empty,
+            type="primary",
         )
     with export_col2:
         st.download_button(
@@ -483,6 +625,7 @@ def render_teacher_page() -> None:
             file_name="reading_notes.csv",
             mime="text/csv",
             disabled=notes_df.empty,
+            type="secondary",
         )
 
     tab_overview, tab_notes, tab_logs = st.tabs(["文献阅读记录", "学生批判性笔记", "对话日志"])
